@@ -1,0 +1,27 @@
+.card {
+    width: 100%;
+    height: 150px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    margin-bottom: 30px;
+}
+
+.card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.card.matched {
+    background-color: #28a745;
+    transform: scale(1.05);
+    transition: transform 0.3s ease, background-color 0.5s ease;
+}
+
+.line {
+    position: absolute;
+    height: 5px;
+    background-color: #000;
+    transform-origin: 0 50%;
+    z-index: 1;
+}
