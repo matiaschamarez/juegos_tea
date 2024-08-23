@@ -67,19 +67,21 @@ function drawLineBetween(card1, card2) {
     line.style.top = `${rect1.top + rect1.height / 2}px`;
     line.style.transform = `rotate(${angle}deg)`;
 
-    setTimeout(() => line.remove(), 500); // Reduce el tiempo de la línea para mejorar la respuesta a los clics rápidos
+    setTimeout(() => line.remove(), 500);
 }
 
 function markAsMatched(card1, card2) {
     isAnimating = true;
     card1.classList.add('matched');
     card2.classList.add('matched');
-    score += 10;
+
+    updateScore();
     document.getElementById('score').textContent = score;
 
     setTimeout(() => {
         isAnimating = false;
-    }, 300);  // Reduce el tiempo de bloqueo para permitir clics más rápidos
+        checkGameCompletion(); // Verifica la finalización del juego después de que las tarjetas se marquen como "matched"
+    }, 300);
 }
 
 function markAsIncorrect(card1, card2) {
@@ -92,6 +94,23 @@ function markAsIncorrect(card1, card2) {
         card2.classList.remove('incorrect');
         isAnimating = false;
     }, 1000);
+}
+
+function updateScore() {
+    const now = new Date();
+    const elapsedTime = (now - startTime) / 1000;
+    const timePenalty = Math.floor(elapsedTime / 10);
+    score += Math.max(10 - timePenalty, 1); // Reducir puntuación según el tiempo transcurrido
+}
+
+function checkGameCompletion() {
+    const matchedCards = document.querySelectorAll('.matched');
+    if (matchedCards.length === cards.length) {
+        clearInterval(timerInterval); // Detener el tiempo cuando todas las tarjetas se emparejan
+        setTimeout(() => {
+            alert(`¡Felicidades! Has completado el juego con una puntuación de ${score}`);
+        }, 100); // Asegura que la alerta se muestre después de que las tarjetas se actualicen
+    }
 }
 
 function initializeGame() {
