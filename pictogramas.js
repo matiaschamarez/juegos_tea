@@ -8,6 +8,10 @@ const cards = [
 ];
 
 let selectedCard = null;
+let score = 0;
+let startTime;
+let timerInterval;
+let isAnimating = false;
 
 function createCardElement(card) {
     const cardElement = document.createElement('div');
@@ -24,12 +28,21 @@ function createCardElement(card) {
 }
 
 function onCardClick(cardElement) {
+    if (isAnimating || cardElement.classList.contains('matched')) {
+        return;
+    }
+
     if (selectedCard) {
+        if (selectedCard === cardElement) {
+            return;  // Evitar que la misma tarjeta se seleccione dos veces
+        }
+
         drawLineBetween(selectedCard, cardElement);
-        
+
         if (selectedCard.dataset.pairId === cardElement.dataset.pairId) {
-            selectedCard.classList.add('matched');
-            cardElement.classList.add('matched');
+            markAsMatched(selectedCard, cardElement);
+        } else {
+            markAsIncorrect(selectedCard, cardElement);
         }
 
         selectedCard = null;
@@ -57,14 +70,56 @@ function drawLineBetween(card1, card2) {
     setTimeout(() => line.remove(), 1000);
 }
 
+function markAsMatched(card1, card2) {
+    isAnimating = true;
+    card1.classList.add('matched');
+    card2.classList.add('matched');
+    score += 10;
+    document.getElementById('score').textContent = score;
+
+    setTimeout(() => {
+        isAnimating = false;
+    }, 500);
+}
+
+function markAsIncorrect(card1, card2) {
+    isAnimating = true;
+    card1.classList.add('incorrect');
+    card2.classList.add('incorrect');
+
+    setTimeout(() => {
+        card1.classList.remove('incorrect');
+        card2.classList.remove('incorrect');
+        isAnimating = false;
+    }, 1000);
+}
+
 function initializeGame() {
     const gameBoard = document.getElementById('game-board');
+    gameBoard.innerHTML = '';
     cards.sort(() => Math.random() - 0.5);
 
     cards.forEach(card => {
         const cardElement = createCardElement(card);
         gameBoard.appendChild(cardElement);
     });
+
+    score = 0;
+    document.getElementById('score').textContent = score;
+
+    startTime = new Date();
+    clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimer, 1000);
 }
+
+function updateTimer() {
+    const now = new Date();
+    const elapsedTime = Math.floor((now - startTime) / 1000);
+    const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
+    const seconds = String(elapsedTime % 60).padStart(2, '0');
+    document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+}
+
+document.getElementById('restart-btn').addEventListener('click', initializeGame);
 
 document.addEventListener('DOMContentLoaded', initializeGame);
