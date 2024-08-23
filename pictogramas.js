@@ -67,7 +67,7 @@ function drawLineBetween(card1, card2) {
     line.style.top = `${rect1.top + rect1.height / 2}px`;
     line.style.transform = `rotate(${angle}deg)`;
 
-    setTimeout(() => line.remove(), 1000);
+    setTimeout(() => line.remove(), 500); // Reduce el tiempo de la línea para mejorar la respuesta a los clics rápidos
 }
 
 function markAsMatched(card1, card2) {
@@ -79,7 +79,7 @@ function markAsMatched(card1, card2) {
 
     setTimeout(() => {
         isAnimating = false;
-    }, 500);
+    }, 300);  // Reduce el tiempo de bloqueo para permitir clics más rápidos
 }
 
 function markAsIncorrect(card1, card2) {
