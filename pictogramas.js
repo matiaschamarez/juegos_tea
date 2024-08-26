@@ -37,80 +37,80 @@ function onCardClick(cardElement) {
             return;  // Evitar que la misma tarjeta se seleccione dos veces
         }
 
-        drawLineBetween(selectedCard, cardElement);
-
         if (selectedCard.dataset.pairId === cardElement.dataset.pairId) {
             markAsMatched(selectedCard, cardElement);
+            selectedCard = null;
         } else {
             markAsIncorrect(selectedCard, cardElement);
         }
-
-        selectedCard = null;
     } else {
         selectedCard = cardElement;
     }
 }
 
-function drawLineBetween(card1, card2) {
-    const rect1 = card1.getBoundingClientRect();
-    const rect2 = card2.getBoundingClientRect();
-
-    const lineLength = Math.hypot(rect2.left - rect1.left, rect2.top - rect1.top);
-    const angle = Math.atan2(rect2.top - rect1.top, rect2.left - rect1.left) * (180 / Math.PI);
-
-    const line = document.createElement('div');
-    line.classList.add('line');
-    document.body.appendChild(line);
-
-    line.style.width = `${lineLength}px`;
-    line.style.left = `${rect1.left + rect1.width / 2}px`;
-    line.style.top = `${rect1.top + rect1.height / 2}px`;
-    line.style.transform = `rotate(${angle}deg)`;
-
-    setTimeout(() => line.remove(), 500);
-}
-
 function markAsMatched(card1, card2) {
-    isAnimating = true;
     card1.classList.add('matched');
     card2.classList.add('matched');
 
-    updateScore();
-    document.getElementById('score').textContent = score;
-
-    setTimeout(() => {
-        isAnimating = false;
-        checkGameCompletion(); // Verifica la finalización del juego después de que las tarjetas se marquen como "matched"
-    }, 300);
+    if (checkGameCompletion()) {
+        calculateFinalScore();
+    }
 }
 
 function markAsIncorrect(card1, card2) {
-    isAnimating = true;
     card1.classList.add('incorrect');
     card2.classList.add('incorrect');
 
-    setTimeout(() => {
-        card1.classList.remove('incorrect');
-        card2.classList.remove('incorrect');
-        isAnimating = false;
-    }, 1000);
-}
-
-function updateScore() {
-    const now = new Date();
-    const elapsedTime = (now - startTime) / 1000;
-    const timePenalty = Math.floor(elapsedTime / 10);
-    score += Math.max(10 - timePenalty, 1); // Reducir puntuación según el tiempo transcurrido
+    card1.classList.remove('incorrect');
+    card2.classList.remove('incorrect');
+    selectedCard = null;
 }
 
 function checkGameCompletion() {
     const matchedCards = document.querySelectorAll('.matched');
-    if (matchedCards.length === cards.length) {
-        clearInterval(timerInterval); // Detener el tiempo cuando todas las tarjetas se emparejan
-        setTimeout(() => {
-            alert(`¡Felicidades! Has completado el juego con una puntuación de ${score}`);
-        }, 100); // Asegura que la alerta se muestre después de que las tarjetas se actualicen
+    return matchedCards.length === cards.length;
+}
+
+function calculateFinalScore() {
+    const now = new Date();
+    const elapsedTime = (now - startTime) / 1000;
+
+    if (elapsedTime <= 5) {
+        score = 100;
+    } else if (elapsedTime <= 7) {
+        score = 95;
+    } else if (elapsedTime <= 10) {
+        score = 90;
+    } else if (elapsedTime <= 13) {
+        score = 85;
+    } else if (elapsedTime <= 16) {
+        score = 80;
+    } else if (elapsedTime <= 20) {
+        score = 75;
+    } else if (elapsedTime <= 30) {
+        score = 70;
+    } else if (elapsedTime <= 40) {
+        score = 65;
+    } else if (elapsedTime <= 50) {
+        score = 60;
+    } else if (elapsedTime <= 60) {
+        score = 50;
+    } else if (elapsedTime <= 80) {
+        score = 40;
+    } else if (elapsedTime <= 90) {
+        score = 30;
+    } else if (elapsedTime <= 100) {
+        score = 20;
+    } else {
+        score = 10;
     }
+
+    document.getElementById('score').textContent = score;
+    
+    // Esperar un momento para asegurarse de que las últimas tarjetas se marquen como correctas antes de mostrar la alerta
+    setTimeout(() => {
+        alert(`¡Felicidades! Has completado el juego con una puntuación de ${score}`);
+    }, 100);
 }
 
 function initializeGame() {
@@ -123,6 +123,8 @@ function initializeGame() {
         gameBoard.appendChild(cardElement);
     });
 
+    selectedCard = null;
+    isAnimating = false;
     score = 0;
     document.getElementById('score').textContent = score;
 
